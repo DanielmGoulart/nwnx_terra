@@ -5,10 +5,12 @@
 
 #include "detours\detours.h"
 
+#pragma region NWServer Calls
 DWORD CNWSObject__DoDamageImmunityOffset = 0x004E1A00;
 __declspec( naked ) int __fastcall CNWSObject__DoDamageImmunity(CNWSObject *cre, void *, CNWSCreature *Attacker,  int DamageDelivered, int DamageFlags, int _bMaxDamage, int bFeedback){__asm{ jmp dword ptr [CNWSObject__DoDamageImmunityOffset] }}
 DWORD CNWSObject__DoDamageResistanceOffset = 0x004E07D0;
 __declspec( naked ) int __fastcall CNWSObject__DoDamageResistance(CNWSObject *pTHIS, void*, CNWSCreature *attacker, int nDamage, signed int damageType, int a5, int a6, int a7){__asm{ jmp dword ptr [CNWSObject__DoDamageResistanceOffset] }}
+#pragma endregion
 
 #pragma region Globals
 bool g_GetDamageRollFlag = false;
@@ -28,20 +30,26 @@ __int16 __fastcall CNWSCreatureStats__GetDamageRoll_Hook(CNWSCreatureStats *creS
 	do{
 		if(creStats->cs_classes[cClassPos].cl_class == CLASS_TYPE_BLACKGUARD){
 			int nDamage = creStats->cs_cha_mod;
-			int nHalfLevel = (creStats->cs_classes[cClassPos].cl_level + 1)/2; // Adicionando +1 para o bônus ser computado nos níveis ímpares ao invés de nos pares
+
+			int nHalfLevel = creStats->cs_classes[cClassPos].cl_level/2;
+
 			if(nDamage > nHalfLevel){
 				nDamage = nHalfLevel;
 			}
-			
-			if(Defender && Defender->obj_generic.obj_type == OBJECT_TYPE_CREATURE){
-				nDamage = CNWSObject__DoDamageImmunity(Defender, nullptr, creStats->cs_original, nDamage, DAMAGE_TYPE_NEGATIVE, a7, 1);
-				nDamage = CNWSObject__DoDamageResistance(Defender, nullptr, creStats->cs_original, nDamage, DAMAGE_TYPE_NEGATIVE, a7, 1, 0);
 
-				CNWSCombatAttackData *CurrAttack = creStats->cs_original->cre_combat_round->GetAttack(creStats->cs_original->cre_combat_round->CurrentAttack);
-				CurrAttack->Damage_Negative += nDamage;
+			CNWSCombatAttackData *CurrAttack = creStats->cs_original->cre_combat_round->GetAttack(creStats->cs_original->cre_combat_round->CurrentAttack);
+			if(CurrAttack->AttackResult == 3 || CurrAttack->AttackResult == 10){
+				nDamage *= creStats->GetCriticalHitMultiplier(0);
 			}
 
+			nDamage = CNWSObject__DoDamageImmunity(Defender, nullptr, creStats->cs_original, nDamage, DAMAGE_TYPE_NEGATIVE, a7, 1);
+			nDamage = CNWSObject__DoDamageResistance(Defender, nullptr, creStats->cs_original, nDamage, DAMAGE_TYPE_NEGATIVE, a7, 1, 0);
+
+			CurrAttack->Damage_Negative += (nDamage + 1);
+
+
 		}
+		cClassPos++;
 	}while(cClassPos < creStats->cs_classes_len);
 
 	return ret;
