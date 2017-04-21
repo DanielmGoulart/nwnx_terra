@@ -15,12 +15,12 @@ BOOL CNWNXTerra::OnCreate (const char* LogDir){
 	char buf[256];
 
 	// initialize the base class
-	sprintf (buf, "%s\\nwnx_ecl.txt", LogDir);
+	sprintf (buf, "%s\\nwnx_terra.txt", LogDir);
 	if (!CNWNXBase::OnCreate (buf))
 		return FALSE;
 	
 	// write copy information to the log file
-	_log (0,"NWNX2 ECL 0.0.1.\n");
+	_log (0,"NWNX2 Terra 0.0.1.\n");
 	_log (0,"Created by zelkin\n\n");
 	
 	pHooks = new NWNXhooks();

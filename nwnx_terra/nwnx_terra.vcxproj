@@ -124,7 +124,7 @@
     <ClCompile Include="..\nwn_internals\CWorldTimer.cpp" />
     <ClCompile Include="..\nwn_internals\nwnx_memory.cpp" />
     <ClCompile Include="..\nwn_internals\nwn_internals.cpp" />
-    <ClCompile Include="ecl.cpp" />
+    <ClCompile Include="terra.cpp" />
     <ClCompile Include="IniFile.cpp" />
     <ClCompile Include="LogFile.cpp" />
     <ClCompile Include="NWNXterra.cpp" />

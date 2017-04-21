@@ -201,10 +201,10 @@
     <ClCompile Include="IniFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ecl.cpp">
+    <ClCompile Include="NWNXterra.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NWNXterra.cpp">
+    <ClCompile Include="terra.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

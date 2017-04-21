@@ -9,6 +9,6 @@
 
 #include "LogFile.h"
 
-#define _log(a,b,...) LogFile::Instance(".\\logs.0\\nwnx_ecl.txt").LOG(a, b, __VA_ARGS__)
+#define _log(a,b,...) LogFile::Instance(".\\logs.0\\nwnx_terra.txt").LOG(a, b, __VA_ARGS__)
 
 #endif
