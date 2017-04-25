@@ -55,6 +55,14 @@ __int16 __fastcall CNWSCreatureStats__GetDamageRoll_Hook(CNWSCreatureStats *creS
 	return ret;
 }
 
+int (__fastcall *CNWSCreatureStats__GetAttackModifierVersus) (CNWSCreatureStats * creStats, void*, CNWSCreature *cre);
+int __fastcall CNWSCreatureStats__GetAttackModifierVersus_Hook (CNWSCreatureStats * creStats, void*, CNWSCreature *cre){
+	int nRet =  CNWSCreatureStats__GetAttackModifierVersus(creStats, nullptr, cre);
+	
+	nRet += creStats->GetFavoredEnemyBonus(cre);
+
+	return nRet;
+}
 
 #define detour_hook(addr, hook, pfunc)							\
 	*(DWORD*)&pfunc = addr;										\
@@ -70,6 +78,8 @@ BOOL NWNXhooks::HookFunctions(){
 	DetourUpdateThread(GetCurrentThread());
 
 	detour_hook( 0x004764D0, CNWSCreatureStats__GetDamageRoll_Hook, CNWSCreatureStats__GetDamageRoll);
+	detour_hook( 0x00470F00, CNWSCreatureStats__GetAttackModifierVersus_Hook, CNWSCreatureStats__GetAttackModifierVersus);
+
 
 	DetourTransactionCommit();
 
