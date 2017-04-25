@@ -45,7 +45,8 @@ __int16 __fastcall CNWSCreatureStats__GetDamageRoll_Hook(CNWSCreatureStats *creS
 			nDamage = CNWSObject__DoDamageImmunity(Defender, nullptr, creStats->cs_original, nDamage, DAMAGE_TYPE_NEGATIVE, a7, 1);
 			nDamage = CNWSObject__DoDamageResistance(Defender, nullptr, creStats->cs_original, nDamage, DAMAGE_TYPE_NEGATIVE, a7, 1, 0);
 
-			CurrAttack->Damage_Negative += (nDamage + 1);
+			if(nDamage > 0)
+				CurrAttack->Damage_Negative += (nDamage + 1);
 
 
 		}
