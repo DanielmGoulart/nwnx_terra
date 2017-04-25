@@ -60,7 +60,8 @@ int (__fastcall *CNWSCreatureStats__GetAttackModifierVersus) (CNWSCreatureStats 
 int __fastcall CNWSCreatureStats__GetAttackModifierVersus_Hook (CNWSCreatureStats * creStats, void*, CNWSCreature *cre){
 	int nRet =  CNWSCreatureStats__GetAttackModifierVersus(creStats, nullptr, cre);
 	
-	nRet += creStats->GetFavoredEnemyBonus(cre);
+	if(cre)
+		nRet += creStats->GetFavoredEnemyBonus(cre);
 
 	return nRet;
 }
