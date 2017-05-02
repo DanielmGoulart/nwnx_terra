@@ -7,7 +7,7 @@
 
 #pragma region NWServer Calls
 DWORD CNWSObject__DoDamageImmunityOffset = 0x004E1A00;
-__declspec( naked ) int __fastcall CNWSObject__DoDamageImmunity(CNWSObject *cre, void *, CNWSCreature *Attacker,  int DamageDelivered, int DamageFlags, int _bMaxDamage, int bFeedback){__asm{ jmp dword ptr [CNWSObject__DoDamageImmunityOffset] }}
+__declspec( naked ) int __fastcall CNWSObject__DoDamageImmunity_Call(CNWSObject *cre, void *, CNWSCreature *Attacker,  int DamageDelivered, int DamageFlags, int _bMaxDamage, int bFeedback){__asm{ jmp dword ptr [CNWSObject__DoDamageImmunityOffset] }}
 DWORD CNWSObject__DoDamageResistanceOffset = 0x004E07D0;
 __declspec( naked ) int __fastcall CNWSObject__DoDamageResistance(CNWSObject *pTHIS, void*, CNWSCreature *attacker, int nDamage, signed int damageType, int a5, int a6, int a7){__asm{ jmp dword ptr [CNWSObject__DoDamageResistanceOffset] }}
 #pragma endregion
@@ -42,7 +42,7 @@ __int16 __fastcall CNWSCreatureStats__GetDamageRoll_Hook(CNWSCreatureStats *creS
 				nDamage *= creStats->GetCriticalHitMultiplier(0);
 			}
 
-			nDamage = CNWSObject__DoDamageImmunity(Defender, nullptr, creStats->cs_original, nDamage, DAMAGE_TYPE_NEGATIVE, a7, 1);
+			nDamage = CNWSObject__DoDamageImmunity_Call(Defender, nullptr, creStats->cs_original, nDamage, DAMAGE_TYPE_NEGATIVE, a7, 1);
 			nDamage = CNWSObject__DoDamageResistance(Defender, nullptr, creStats->cs_original, nDamage, DAMAGE_TYPE_NEGATIVE, a7, 1, 0);
 
 			if(nDamage > 0)
@@ -66,6 +66,29 @@ int __fastcall CNWSCreatureStats__GetAttackModifierVersus_Hook (CNWSCreatureStat
 	return nRet;
 }
 
+int (__fastcall *CNWSObject__DoDamageImmunity)(CNWSObject *cre, void *, CNWSCreature *Attacker,  int DamageDelivered, int DamageFlags, int _bMaxDamage, int bFeedback);
+int __fastcall CNWSObject__DoDamageImmunity_Hook(CNWSObject *cre, void *, CNWSCreature *Attacker,  int DamageDelivered, int DamageFlags, int _bMaxDamage, int bFeedback){
+	if(g_GetDamageRollFlag){
+		if(cre){
+			CNWSCreature *creat = cre->obj_generic.obj_type == OBJECT_TYPE_CREATURE ? (CNWSCreature *) cre : NULL;
+			if(creat){
+				if(creat->cre_mode_combat == COMBAT_MODE_DEFENSIVE_STANCE){
+					int nDR = creat->obj.obj_vartable.GetInt(CExoString("nwnx_dd_dr"));
+					if(nDR > 0){
+						DamageDelivered -= nDR;
+						if(DamageDelivered < 0) DamageDelivered = 0;
+					}
+				}
+			}
+		}
+	}
+
+	int nRet = CNWSObject__DoDamageImmunity(cre, NULL, Attacker,DamageDelivered,DamageFlags,_bMaxDamage,bFeedback);
+
+	return nRet;
+}
+
+
 #define detour_hook(addr, hook, pfunc)							\
 	*(DWORD*)&pfunc = addr;										\
 	if(DetourAttach(&(PVOID&)pfunc, hook) == 0)					\
@@ -81,7 +104,7 @@ BOOL NWNXhooks::HookFunctions(){
 
 	detour_hook( 0x004764D0, CNWSCreatureStats__GetDamageRoll_Hook, CNWSCreatureStats__GetDamageRoll);
 	detour_hook( 0x00470F00, CNWSCreatureStats__GetAttackModifierVersus_Hook, CNWSCreatureStats__GetAttackModifierVersus);
-
+	detour_hook( 0x004E1A00, CNWSObject__DoDamageImmunity_Hook, CNWSObject__DoDamageImmunity);
 
 	DetourTransactionCommit();
 
