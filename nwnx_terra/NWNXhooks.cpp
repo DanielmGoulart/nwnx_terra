@@ -39,7 +39,7 @@ __int16 __fastcall CNWSCreatureStats__GetDamageRoll_Hook(CNWSCreatureStats *creS
 
 			CNWSCombatAttackData *CurrAttack = creStats->cs_original->cre_combat_round->GetAttack(creStats->cs_original->cre_combat_round->CurrentAttack);
 			if(CurrAttack->AttackResult == 3 || CurrAttack->AttackResult == 10){
-				nDamage *= creStats->GetCriticalHitMultiplier(0);
+				nDamage *= creStats->GetCriticalHitMultiplier(bOffHand);
 			}
 
 			nDamage = CNWSObject__DoDamageImmunity_Call(Defender, nullptr, creStats->cs_original, nDamage, DAMAGE_TYPE_NEGATIVE, a7, 1);
